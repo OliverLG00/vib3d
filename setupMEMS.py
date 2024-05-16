@@ -318,4 +318,5 @@ if __name__ == '__main__':
         mseval = np.mean((yval - np.dot(A, xf))**2)
         
         mse.append( (msetrain, mseval) )
-        
+    
+    dominant_freq = frequencies[np.argmin(np.array(mse)[:,1])] # 0.2479 Hz

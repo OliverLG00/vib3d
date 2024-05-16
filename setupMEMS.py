@@ -138,24 +138,29 @@ def baseN(knotvec, t, i, n, order): # compute basis for segments depending on t.
         N = term1 + term2
     return N
 
-def createAspline(x, segments=0, degree=3, method=None): # create A-matrix for weight coefficients
+def createAspline(x, knotvec=None, segments=0, degree=3, method=None): # create A-matrix for weight coefficients
     
-    ###########################################################################
-    if segments < 1:
-        segments = 1
-    
-    if method == 'periodic':
-        dt = np.min(np.diff(x)) / (np.max(x)-np.min(x))
-        knotvec = np.r_[ -np.flip(np.arange(dt, degree*dt+dt, dt)), np.linspace(0, 1, segments+1), 1+np.arange(dt, degree*dt+dt, dt) ]
+    if np.any(knotvec==None):
+        if segments < 1:
+            segments = 1
+        
+        if method == 'periodic':
+            dt = np.min(np.diff(x)) / (np.max(x)-np.min(x))
+            knotvec = np.r_[ -np.flip(np.arange(dt, degree*dt+dt, dt)), np.linspace(0, 1, segments+1), 1+np.arange(dt, degree*dt+dt, dt) ]
+        else:
+            knotvec = np.r_[ np.repeat(0, degree), np.linspace(0, 1, segments+1), np.repeat(1, degree) ]
+        xmin, xmax = x.min(), x.max()
+        x = (x - xmin) / (xmax - xmin)
     else:
-        knotvec = np.r_[ np.repeat(0, degree), np.linspace(0, 1, segments+1), np.repeat(1, degree) ]
-
-    x = (x - np.min(x)) / (np.max(x) - np.min(x))
+        xmin, xmax = knotvec.min(), knotvec.max()
+        knotvec = (knotvec - xmin) / (xmax - xmin)
+        x = (x - xmin) / (xmax - xmin)
     
     order = degree + 1
     N = []
     for m in range(0, len(knotvec)-order):
         N.append( baseN(knotvec, x, m, order, order) )
+    knotvec = knotvec * (xmax - xmin) + xmin
     return np.array(N).T, knotvec
 
 def estimatespline(time, data, frequency, segments=1, degree=3, method=None, max_iter=100):
@@ -263,7 +268,54 @@ if __name__ == '__main__':
     Xval, Xtest = train_test_split(tmp, test_size=1/3, shuffle=False)
     
     #%% mean spline
-    Ax, knotvec_x = createAspline(Xtrain['X'], segments=0) # spline in the pca x-axis
-    Ay, knotvec_y = createAspline(Xtrain['Y'], segments=0) # spline in the pca y-axis
+    # print(f'Search for mean geometry and its respective best number of spline segments')
+    # mse, segments = [], []
+    # for i in tqdm(range(1, 10+1)):
+    #     segments.append( i )
+    #     Ax, knotvec_x = createAspline(Xtrain['X'], segments=i) # spline in the pca x-axis
+    #     Ay, knotvec_y = createAspline(Xtrain['Y'], segments=i) # spline in the pca y-axis
+    #     A = Ax * Ay
+        
+    #     x = np.dot( np.linalg.inv(np.dot(A.T, A)), np.dot(A.T, Xtrain['Z']) )
+    #     msetrain = np.mean((Xtrain['Z'] - np.dot(A, x))**2)
+        
+    #     Ax, knotvec_x = createAspline(Xval['X'], segments=i) # spline in the pca x-axis
+    #     Ay, knotvec_y = createAspline(Xval['Y'], segments=i) # spline in the pca y-axis
+    #     A = Ax * Ay
+    #     mseval = np.mean((Xval['Z'] - np.dot(A, x))**2)
+    #     mse.append( (msetrain, mseval) )
     
-    A = Ax * Ay
+    mean_segments = 4 #segments[ np.array(mse)[:,1].argmin() ] # 4
+    
+    #%%
+    print(f'Search for the first most dominant frequency:')
+    un = np.unique(np.diff(np.sort(pca.index)))
+    fmin, fmax = 1/(pca.index.max() - pca.index.min()), 20# 1/np.min(un[un>0])
+    frequencies = np.arange(fmin, fmax, 0.01)
+    
+    Ax, knotvec_x = createAspline(Xtrain['X'], segments=mean_segments) # spline in the pca x-axis
+    Ay, knotvec_y = createAspline(Xtrain['Y'], segments=mean_segments) # spline in the pca y-axis
+    Atrain = Ax * Ay
+    x = np.dot( np.linalg.inv(np.dot(Atrain.T, Atrain)), np.dot(Atrain.T, Xtrain['Z']) )
+    ytrain = Xtrain['Z'] - np.dot(Atrain, x)
+    
+    Ax, knotvec_x = createAspline(Xval['X'], knotvec=knotvec_x) # spline in the pca x-axis
+    Ay, knotvec_y = createAspline(Xval['Y'], knotvec=knotvec_y) # spline in the pca y-axis
+    Aval = Ax * Ay
+    yval = Xval['Z'] - np.dot(Aval, x)
+    
+    time_train = 2*np.pi*np.float64(Xtrain.index)
+    time_val = 2*np.pi*np.float64(Xval.index)
+    mse = []
+    for f in tqdm(frequencies):
+        valtrain = np.outer(time_train, f)
+        valval = np.outer(time_val, f)
+        A = np.c_[ np.cos(valtrain), np.sin(valtrain) ]
+        xf = np.dot( np.linalg.inv(np.dot(A.T, A)), np.dot(A.T, ytrain) )
+        msetrain = np.mean((ytrain - np.dot(A, xf))**2)
+        
+        A = np.c_[ np.cos(valval), np.sin(valval) ]
+        mseval = np.mean((yval - np.dot(A, xf))**2)
+        
+        mse.append( (msetrain, mseval) )
+        

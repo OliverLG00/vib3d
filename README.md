@@ -8,7 +8,7 @@ Sensors: [Livox Avia](https://www.livoxtech.com/de/avia) and [Blickfeld Cube1 Ou
 Furthermore, we analyze Livox data with different methodologies. <br/>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/70d5209c-ee47-4122-b198-9013d64ebf26" width="350" style="display: inline-block; margin-right: 10px;">
-  <img src="https://github.com/user-attachments/assets/d09403fe-0d9f-4b02-8f0b-10cf7c19199e" width="350" style="display: inline-block;">
+  <img src="https://github.com/user-attachments/assets/70d5209c-ee47-4122-b198-9013d64ebf26" width="300" style="display: inline-block; margin-right: 10px;">
+  <img src="https://github.com/user-attachments/assets/d09403fe-0d9f-4b02-8f0b-10cf7c19199e" width="300" style="display: inline-block;">
 </p>
 

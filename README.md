@@ -5,7 +5,7 @@ Sensors: [Livox Avia](https://www.livoxtech.com/de/avia) and [Blickfeld Cube1 Ou
 <p align="center">
   <img src="https://github.com/user-attachments/assets/746f6cae-6dda-4a08-8ac3-1d2a2790eb17" width="400" style="float: left; margin-right: 10px;">
 </p>
-Furthermore, we analyze Livox data with different methodologies and compare them in the file [comparison.py](/comparison.py). <br/>
+Furthermore, we analyze Livox data with different methodologies and compare them in the file 'comparison.py'. <br/>
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/70d5209c-ee47-4122-b198-9013d64ebf26" width="300" style="display: inline-block; margin-right: 10px;">

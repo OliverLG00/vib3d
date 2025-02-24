@@ -4,7 +4,7 @@ Sensors: [Livox Avia](https://www.livoxtech.com/de/avia) and [Blickfeld Cube1 Ou
 ## MEMS LiDAR sensors for low-cost 3D frequency mode detection
 Frequency estimation and knot vector determination is computed in <code>setupMEMS.py</code> and <code>plotMEMS.py</code>, respectively.<br/>
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/746f6cae-6dda-4a08-8ac3-1d2a2790eb17" width="400" style="float: left; margin-right: 10px;">
+  <img src="https://github.com/user-attachments/assets/3482db22-d087-4150-970f-eb3eeb0c88f2" width="400" style="float: left; margin-right: 10px;">
 </p>
 
 ## Spatio-temporal mode description in LiDAR point clouds

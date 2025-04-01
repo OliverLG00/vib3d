@@ -463,7 +463,7 @@ if __name__ == '__main__':
     #%% interpolate and compute spectrum
     time_steps = 2.5e-2
     frequencies = np.arange(0, 1/2.5e-2/2, 10.65e-3)
-    nperseg = int(time_steps/np.unique(np.round(np.diff(frequencies), 5))*3 )
+    nperseg = (time_steps/np.unique(np.round(np.diff(frequencies), 5))*3 ).astype(int)
     
     ts, power, sres = [], [], []
     for i in tqdm(np.unique(ret.binnumber)):
@@ -533,14 +533,16 @@ if __name__ == '__main__':
     for idx in tqdm(np.unique(ret.binnumber)):
         tmp = pca.iloc[ret.binnumber == idx]
         
-        # A, knotx, knoty = createANURB(tmp['X'], tmp['Y'], knotvecx=parameters['mean geometry']['knotvec']['x'], knotvecy=parameters['mean geometry']['knotvec']['y'], degree=3, method=None)
-        # mres.append( tmp['Z'] - A.dot(parameters['mean geometry']['cv']) )
-        # A, knotx, knoty = createANURB(tmp['X'], tmp['Y'], knotvecx=parameters['Fourier'][i]['a']['knotvec']['x'], knotvecy=parameters['Fourier'][i]['a']['knotvec']['y'], degree=3, method=None)
-        # mres[-1] -= A.multiply(np.cos(np.outer(np.float64(tmp.index), parameters['frequency'][i]))).dot(parameters['Fourier'][i]['a']['cv'])
-        # A, knotx, knoty = createANURB(tmp['X'], tmp['Y'], knotvecx=parameters['Fourier'][i]['b']['knotvec']['x'], knotvecy=parameters['Fourier'][i]['b']['knotvec']['y'], degree=3, method=None)
-        # mres[-1] -= A.multiply(np.sin(np.outer(np.float64(tmp.index), parameters['frequency'][i]))).dot(parameters['Fourier'][i]['b']['cv'])
-        # mres[-1] = np.mean( np.abs(mres[-1]) ) * np.median( np.sign(mres[-1]) )
+        ## full spatio-temporal connections
+        A, knotx, knoty = createANURB(tmp['X'], tmp['Y'], knotvecx=parameters['mean geometry']['knotvec']['x'], knotvecy=parameters['mean geometry']['knotvec']['y'], degree=3, method=None)
+        mres.append( tmp['Z'] - A.dot(parameters['mean geometry']['cv']) )
+        A, knotx, knoty = createANURB(tmp['X'], tmp['Y'], knotvecx=parameters['Fourier'][i]['a']['knotvec']['x'], knotvecy=parameters['Fourier'][i]['a']['knotvec']['y'], degree=3, method=None)
+        mres[-1] -= A.multiply(np.cos(np.outer(np.float64(tmp.index), parameters['frequency'][i]))).dot(parameters['Fourier'][i]['a']['cv'])
+        A, knotx, knoty = createANURB(tmp['X'], tmp['Y'], knotvecx=parameters['Fourier'][i]['b']['knotvec']['x'], knotvecy=parameters['Fourier'][i]['b']['knotvec']['y'], degree=3, method=None)
+        mres[-1] -= A.multiply(np.sin(np.outer(np.float64(tmp.index), parameters['frequency'][i]))).dot(parameters['Fourier'][i]['b']['cv'])
+        mres[-1] = np.mean( np.abs(mres[-1]) ) * np.median( np.sign(mres[-1]) )
         
+        # bin wise
         A = np.c_[ np.ones(len(tmp)),
                   np.cos(parameters['frequency'][i]*np.float64(tmp.index)), 
                   np.sin(parameters['frequency'][i]*np.float64(tmp.index)),
@@ -611,7 +613,7 @@ if __name__ == '__main__':
     ax.plot_surface(mx, my, samplitude - amplitude, cmap='viridis')
     
     ax.set_zlim([-2e-3, 2e-3])
-    # ax.set_zlim([0, 3e-2])
+    ax.set_zlim([0, 3e-2])
     ax.set_xlim([-1, 1])
     ax.set_ylim([-0.5, 0.5])
     ax.set_ylim(ax.get_ylim()[::-1])
@@ -632,8 +634,8 @@ if __name__ == '__main__':
     ax.set_zlabel('$w$ [mm]', fontsize=fontsize*scale, fontfamily=fontfamily, labelpad=5*scale)
     
     #%% plot residuals for sres and mres change in next line
-    z = (griddata(coords, sres, (mx.flatten(), my.flatten()), method='cubic').reshape(mx.shape))
-    # z = (griddata(coords, mres, (mx.flatten(), my.flatten()), method='cubic').reshape(mx.shape))
+    # z = (griddata(coords, sres, (mx.flatten(), my.flatten()), method='cubic').reshape(mx.shape))
+    z = (griddata(coords, mres, (mx.flatten(), my.flatten()), method='cubic').reshape(mx.shape))
     res = (z - cmin) / (cmax - cmin)
     # res = (z - np.nanmin(z)) / (np.nanmax(z) - np.nanmin(z))
     
@@ -641,8 +643,8 @@ if __name__ == '__main__':
     ax.view_init(elev=30, azim=-240, roll=0)
     ax.xaxis.pane.fill, ax.yaxis.pane.fill, ax.zaxis.pane.fill = False, False, False
     
-    surf = ax.plot_surface(mx, my, samplitude, facecolors=plt.cm.viridis( res ), cmap='viridis' )
-    # surf = ax.plot_surface(mx, my, amplitude, facecolors=plt.cm.viridis( res ), cmap='viridis' )
+    surf = ax.plot_surface(mx, my, samplitude, facecolors=plt.cm.seismic( res ), cmap='seismic' )
+    # surf = ax.plot_surface(mx, my, amplitude, facecolors=plt.cm.seismic( res ), cmap='seismic' )
     # surf = ax.plot_surface(mx, my, z, cmap='viridis')
     
     cb = fig.colorbar(surf, shrink=.75, fraction=.1, orientation='horizontal', extend='both')

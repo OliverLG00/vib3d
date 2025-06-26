@@ -15,4 +15,4 @@ Furthermore, we analyze Livox data with different methodologies and compare them
   <img src="https://github.com/user-attachments/assets/d09403fe-0d9f-4b02-8f0b-10cf7c19199e" width="300" style="display: inline-block;">
 </p>
 
-![Static Badge](https://img.shields.io/badge/10.5445%2FIR%2F1000180525-red?style=flat&logo=doi&logoColor=white&labelColor=black&link=https%3A%2F%2Fdoi.org%2F10.5445%2FIR%2F1000180525)
+![Static Badge](https://img.shields.io/badge/10.5445%2FIR%2F1000180525-red?style=flat&logo=doi&logoColor=white&labelColor=black)](https://doi.org/2F10.5445/IR/1000180525)
